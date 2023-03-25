@@ -4,6 +4,7 @@ ihsElasticity <- function (model,
                            data,
                            conf_level = .95,
                            iv = FALSE) {
+  require(marginaleffects)
   
   if (class(model) == 'fixest') {
     data <- data[obs(model), ]  
@@ -37,7 +38,7 @@ ihsElasticity <- function (model,
                    mean( sinh(data[[outcome_var]]) ),
                    ') = 0') 
   } else if (type == 'arcsinh-linear-dummy-exact') {
-    y_hat_mean <- mean( predict(m_ihs) )
+    y_hat_mean <- mean( predict(model) )
     
     form <- paste0( '(',
                     sinh(y_hat_mean), 
@@ -48,7 +49,7 @@ ihsElasticity <- function (model,
                     ') = 0'
     ) # end paste0 
   } else if (type == 'arcsinh-linear-dummy-approx') {
-    var_b <- model$se[explanatory_var]^2 * .5
+    var_b <- diag(vcov(model))[explanatory_var] * .5
     form <- paste0('exp(', explanatory_var_name,' - ', var_b, ') - 1 = 0')
     
   } else if (type == 'arcsinh-arcsinh') {
